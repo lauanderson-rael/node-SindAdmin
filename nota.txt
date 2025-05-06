@@ -10,7 +10,8 @@ rg
 cpf
 n
 n2
-data
+data 
+.
 
 
 carteira2.pdf:
