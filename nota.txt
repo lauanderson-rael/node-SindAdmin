@@ -1,46 +1,32 @@
-infelismente mapeei isso aqui errado. Corrija com base nos comentarios
-muda epenas os valores, não mexa na orden das chaves
+estadocv
+nasc
+bairro
+mae 
+pai
+natu
+rua
+emissao
+rg
+cpf
+n
+n2
+data
 
-errado:
+
+carteira2.pdf:
 const fields = {
-        'text_2ulgj': "Mariano da Silva Costa", // deve ser === text_8wcnl
-        'text_8wcnl': "Maria do Amparo Barbosa", // deve ser === text_14vkru
-        'text_10rxis': 'MUTIRAO',  // deve ser === text_15nixr
-        'text_11jvcb': 'COELHO NETO-MA', // deve ser === text_17vtnd
-        'text_14vkru': '10/09/1988',  // deve ser === text_18audv
-        'text_12npus': 'SOLTEIRO', // deve ser === text_7vupy
-        'text_4evix': '627', // deve ser === text_9ci
-        'text_18audv': '688', // deve ser === text_19xymn
-        'text_5jsqr': formData.nome_completo, // deve ser === text_10rxis
-        'text_17vtnd': formData.cpf,  // deve ser === text_4evix
-        'text_15nixr': formData.rg || 'Não informado', // deve ser ===  text_2ulgj
-        'text_9ci': formData.endereco || 'Não informado', // deve ser ===  text_12npus
-        'text_19xymn': formData.data_filiacao || 'Não informada', // deve ser === text_11jvcb
-        'text_7vupy': formData.data_filiacao || 'Não informada'  // deve ser === text_5jsqr
-    };
-
-EXEMPLO:
-const fields = {
-        'text_2ulgj': "Maria do Amparo Barbosa",
-        'text_8wcnl': '10/09/1988',
-         'text_10rxis': formData.rg,
-         'text_11jvcb': formData.cpf,
-         'text_14vkru': 'N688',
-         'text_12npus':  formData.data_filiacao || 'Não informada',
-         'text_4evix': formData.endereco || 'Não informado',
-         'text_18audv': formData.data_filiacao || 'Não informada',
-         'text_5jsqr':  'MUTIRAO',
-         'text_17vtnd':  'N638',
-          'text_15nixr': "Mariano da Silva Costa",
-           'text_9ci': 'SOLTEIRO',
-            'text_19xymn': 'COELHO NETO-MA',
-            'text_7vupy': formData.nome_completo
-
-
-
-
-
-
-        //....
-
-    };
+      'text_2ulgj': "Maria do Amparo Barbosa",
+      'text_8wcnl': '10/09/1988',
+      'text_10rxis': formData.rg,
+      'text_11jvcb': formData.cpf,
+      'text_14vkru': 'N688',
+      'text_12npus': formData.data_filiacao || 'Não informada',
+      'text_4evix': formData.endereco || 'Não informado',
+      'text_18audv': formData.data_filiacao || 'Não informada',
+      'text_5jsqr': 'MUTIRAO',
+      'text_17vtnd': 'N688',
+      'text_15nixr': "Mariano da Silva Costa",
+      'text_9ci': 'SOLTEIRO',
+      'text_19xymn': formData.nome_completo,
+      'text_7vupy': 'COELH0 NETO-MA'
+   };

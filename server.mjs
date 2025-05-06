@@ -5,11 +5,9 @@ import fs from 'fs';
 import Docxtemplater from 'docxtemplater';
 import PizZip from 'pizzip';
 import { PDFDocument } from 'pdf-lib';
-
+// Configurações
 const app = express();
 const port = 3000;
-
-// Configurações
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public'));
 app.use('/templates', express.static('templates'));
@@ -32,12 +30,11 @@ const TEMPLATES = {
       name: 'carteira',
       displayName: 'Carteira de Sócio',
       outputFilename: 'carteira_socio.pdf',
-      templatePath: './templates/carteira2.pdf',
+      templatePath: './templates/carteira5.pdf',
       isPdf: true
    }
 };
 
-// Função para formatar a data de filiação (YYYY-MM-DD → DD/MM/YYYY)
 function formatarDataFiliacao(dataISO) {
    if (!dataISO) return 'Não informada';
    const [ano, mes, dia] = dataISO.split('-');
@@ -49,37 +46,35 @@ async function generatePdf(templatePath, formData) {
    const pdfBytes = fs.readFileSync(templatePath);
    const pdfDoc = await PDFDocument.load(pdfBytes);
    const form = pdfDoc.getForm();
-
    const fields = {
-      'text_2ulgj': "Maria do Amparo Barbosa",
-      'text_8wcnl': '10/09/1988',
-      'text_10rxis': formData.rg,
-      'text_11jvcb': formData.cpf,
-      'text_14vkru': 'N688',
-      'text_12npus': formData.data_filiacao || 'Não informada',
-      'text_4evix': formData.endereco || 'Não informado',
-      'text_18audv': formData.data_filiacao || 'Não informada',
-      'text_5jsqr': 'MUTIRAO',
-      'text_17vtnd': 'N638',
-      'text_15nixr': "Mariano da Silva Costa",
-      'text_9ci': 'SOLTEIRO',
-      'text_19xymn': 'COELHO NETO-MA',
-      'text_7vupy': formData.nome_completo
+      'mae': "Maria do Amparo Barbosa",
+      'nasc': '10/09/1988',
+      'rg': formData.rg,
+      'cpf': formData.cpf,
+      'n': 'N688',
+      'emissao': formData.data_filiacao || 'Não informada',
+      'rua': formData.endereco || 'Não informado',
+      'data': formData.data_filiacao || 'Não informada',
+      'bairro': 'MUTIRAO',
+      'n2': 'N688',
+      'pai': "Mariano da Silva Costa",
+      'estadocv': 'SOLTEIRO',
+      'nome': formData.nome_completo,
+      'natu': 'COELH0 NETO-MA'
    };
 
    Object.entries(fields).forEach(([fieldName, value]) => {
       try {
          const field = form.getTextField(fieldName);
          field.setText(value);
+        
       } catch (e) {
          console.warn(`Campo ${fieldName} não encontrado no PDF`);
       }
    });
-   //form.flatten();
    return await pdfDoc.save();
 }
 
-// Função para gerar Documento (DOCX ou PDF)
 async function generateDocument(templateConfig, formData) {
    // Dados comuns a todos templates
    const templateData = {
