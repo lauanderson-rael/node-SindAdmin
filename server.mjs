@@ -108,8 +108,8 @@ async function generateDocument(templateConfig, formData) {
         templateData.bairro = formData.bairro || 'Não informado';
         //templateData.nasc = formData.nasc || 'Não informado';
        // templateConfig.estado_civil = formData.estadocivil || 'Não informado';
-       templateData.estadocivil2 = formData.estado_civil2 || 'Não informado'; // Adicionando Estado Civil
-       templateData.nasc = formData.data_nasc || 'Não informada'; // Adicionando Data de Nascimento
+       templateData.estadocivil2 = formData.estado_civil2 || 'Não informado'; 
+       templateData.nasc = formatarDataFiliacao(formData.data_nasc) || 'Não informada'; 
     }
 
     if (templateConfig.isPdf) {
