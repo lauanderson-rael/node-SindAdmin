@@ -3,243 +3,276 @@
 <html lang="pt-BR">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de Documentos</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .document-option {
-            cursor: pointer;
-            transition: all 0.3s;
-        }
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>SindAdmin</title>
+   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+   <style>
+      .document-option {
+         cursor: pointer;
+         transition: all 0.3s;
+      }
 
-        .document-option:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
+      .document-option:hover {
+         transform: translateY(-3px);
+         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
 
-        .document-option.active {
-            border: 2px solid #0d6efd;
-            background-color: #f8f9fa;
-        }
+      .document-option.active {
+         border: 2px solid #0d6efd;
+         background-color: #f8f9fa;
+      }
 
-        #camposResidencia {
-            transition: all 0.3s ease;
-            overflow: hidden;
-        }
-    </style>
+      #camposResidencia {
+         transition: all 0.3s ease;
+         overflow: hidden;
+      }
+      label{
+         font-weight: 600;
+      }
+
+      footer {
+         background-color: #2c3e50;
+         color: #ecf0f1;
+      }
+
+      footer a {
+         color: #ecf0f1;
+         text-decoration: none;
+      }
+
+      footer a:hover {
+         text-decoration: underline;
+      }
+   </style>
 </head>
 
-<body class="bg-light py-5">
-    <div class="container">
-        <div class="card mx-auto shadow" style="max-width: 800px">
-            <div class="card-body p-4">
-                <h2 class="text-primary text-center mb-4">Gerador de Documentos</h1>
+<body class="bg-light pt-3">
+   <div class="container">
+      <div class="card mx-auto shadow" style="max-width: 800px">
+         <div class="card-body p-4">
+            <h3 class="text-primary text-center mb-4">
+               SindAdmin - Gerador de Documentos Sindicais
+            </h3>
 
-                    <!-- Seção de seleção de documento -->
-                    <div class="mb-4">
-                        <h5 class="mb-3">Selecione o documento a ser gerado:</h5>
-                        <div class="row" id="documentOptions">
-                            <!-- Opções serão preenchidas via JavaScript -->
-                            <div class="col-12 text-center">
-                                <div class="spinner-border text-primary" role="status">
-                                    <span class="visually-hidden">Carregando...</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Formulário -->
-                    <form id="documentForm" action="/generate-docs" method="POST">
-                        <input type="hidden" name="template" id="selectedTemplate" value="filiacao">
-
-                        <div class="mb-3">
-                            <label class="form-label">Nome Completo
-                                <span class="text-danger">*</span>
-                            </label>
-                            <input type="text" class="form-control" name="nome_completo" placeholder="DIGITE O NOME COMPLETO" required>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">CPF
-                                    <span class="text-danger">*</span>
-                                </label>
-                                <input type="text" class="form-control" name="cpf" required placeholder="000.000.000-00">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">RG</label>
-                                <input type="text" class="form-control" name="rg" placeholder="00.000.000-0">
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-8 mb-3">
-                                <label class="form-label">Endereço</label>
-                                <input type="text" class="form-control" name="endereco" placeholder="RUA X, 123">
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">Bairro</label>
-                                <input type="text" class="form-control" name="bairro" placeholder="CENTRO">
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Data de Filiação</label>
-                            <input type="date" class="form-control" name="data_filiacao">
-                        </div>
-
-                        <!-- Campos específicos para residência -->
-                        <div id="camposResidencia" style="display: none;">
-                            <div class="mb-3">
-                                <label class="form-label">Sexo</label>
-                                <select class="form-select" name="sexo">
-                                    <option value="M">Masculino</option>
-                                    <option value="F">Feminino</option>
-                                </select>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Estado Civil</label>
-                                <input type="text" class="form-control" name="estado_civil" placeholder="Solteiro, Casado, etc.">
-                            </div>
-                        </div>
-                        <!-- novo -->
-
-                        <!-- Campos específicos para Carteira de Sócio -->
-                        <div id="camposCarteira" style="display: none;">
-                            
-                                <div class="mb-3">
-                                    <label class="form-label">Estado Civil</label>
-                                    <input type="text" class="form-control" name="estado_civil2" placeholder="Solteiro, Casado, etc.">
-                                </div>
-
-                                <div class="mb-3">
-                                    <label class="form-label">Data de Nascimento</label>
-                                    <input type="date" class="form-control" name="data_nasc">
-                                </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Nome da Mãe</label>
-                                <input type="text" class="form-control" name="mae" placeholder="Digite o nome da mãe">
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Nome do Pai</label>
-                                <input type="text" class="form-control" name="pai" placeholder="Digite o nome do pai">
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Naturalidade</label>
-                                <input type="text" class="form-control" name="naturalidade" placeholder="Cidade - UF">
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Número da Carteira</label>
-                                <input type="text" class="form-control" name="numero" placeholder="Ex: 688">
-                            </div>
-                        </div>
-
-                        <!-- novo -->
-
-                        <div class="d-flex justify-content-between align-items-center mt-4">
-                            <small class="text-muted">* Campos obrigatórios</small>
-                            <button type="submit" class="btn btn-primary px-4" id="generateButton">Gerar Documento</button>
-                        </div>
-                    </form>
+            <!-- Seção de seleção de documento -->
+            <div class="mb-4">
+               <h5 class="mb-3">Selecione o documento a ser gerado:</h5>
+               <div class="row" id="documentOptions">
+                  <!-- Opções serão preenchidas via JavaScript -->
+                  <div class="col-12 text-center">
+                     <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Carregando...</span>
+                     </div>
+                  </div>
+               </div>
             </div>
-        </div>
-    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Máscara para CPF
-        document.querySelector('[name="cpf"]').addEventListener('input', function (e) {
-            let value = e.target.value.replace(/\D/g, '');
-            value = value.replace(/(\d{3})(\d)/, '$1.$2');
-            value = value.replace(/(\d{3})(\d)/, '$1.$2');
-            value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-            e.target.value = value;
-        });
+            <!-- Formulário -->
+            <form id="documentForm" action="/generate-docs" method="POST">
+               <input type="hidden" name="template" id="selectedTemplate" value="filiacao">
 
-        // Função para atualizar campos visíveis
-        function atualizarCampos() {
-            // const templateSelecionado = document.getElementById('selectedTemplate').value;
-            // const camposResidencia = document.getElementById('camposResidencia');
-            // camposResidencia.style.display = templateSelecionado === 'residencia' ? 'block' : 'none';
+               <div class="mb-3">
+                  <label class="form-label">Nome Completo
+                     <span class="text-danger">*</span>
+                  </label>
+                  <input type="text" class="form-control" name="nome_completo" placeholder="DIGITE O NOME COMPLETO"
+                     required>
+               </div>
 
-            const templateSelecionado = document.getElementById('selectedTemplate').value;
+               <div class="row">
+                  <div class="col-md-6 mb-3">
+                     <label class="form-label">CPF
+                        <span class="text-danger">*</span>
+                     </label>
+                     <input type="text" class="form-control" name="cpf" required placeholder="000.000.000-00">
+                  </div>
+                  <div class="col-md-6 mb-3">
+                     <label class="form-label">RG</label>
+                     <input type="text" class="form-control" name="rg" placeholder="00.000.000-0">
+                  </div>
+               </div>
 
-            const camposResidencia = document.getElementById('camposResidencia');
-            const camposCarteira = document.getElementById('camposCarteira');
 
-            camposResidencia.style.display = templateSelecionado === 'residencia' ? 'block' : 'none';
-            camposCarteira.style.display = templateSelecionado === 'carteira' ? 'block' : 'none';
-        }
+               <div class="row">
+                  <div class="col-md-6 mb-3">
+                     <label class="form-label">Endereço</label>
+                     <input type="text" class="form-control" name="endereco" placeholder="RUA X, 123">
+                  </div>
+                  <div class="col-md-6 mb-3">
+                     <label class="form-label">Bairro</label>
+                     <input type="text" class="form-control" name="bairro" placeholder="CENTRO">
+                  </div>
+               </div>
 
-        // Carrega os templates disponíveis
-        document.addEventListener('DOMContentLoaded', function () {
-            fetch('/templates')
-                .then(response => response.json())
-                .then(templates => {
-                    const container = document.getElementById('documentOptions');
-                    container.innerHTML = '';
+               <div class="mb-3">
+                  <label class="form-label">Data de Filiação</label>
+                  <input type="date" class="form-control" name="data_filiacao">
+               </div>
 
-                    templates.forEach(template => {
-                        const col = document.createElement('div');
-                        col.className = 'col-md-4 mb-3';
+               <!-- Campos específicos para residência -->
 
-                        const option = document.createElement('div');
-                        option.className = 'card document-option p-3 text-center';
-                        option.innerHTML = `
+               <div id="camposResidencia" style="display: none;">
+                  <div class="row">
+                     <div class="col-md-6 mb-3">
+                        <label class="form-label">Sexo</label>
+                        <select class="form-select" name="sexo">
+                           <option value="M">Masculino</option>
+                           <option value="F">Feminino</option>
+                        </select>
+                     </div>
+                     <div class="col-md-6 mb-3">
+                        <label class="form-label">Estado Civil</label>
+                        <input type="text" class="form-control" name="estado_civil"
+                           placeholder="Solteiro, Casado, etc.">
+                     </div>
+                  </div>
+               </div>
+
+               <!-- Campos específicos para Carteira de Sócio -->
+               <div id="camposCarteira" style="display: none;">
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label">Estado Civil</label>
+                      <input type="text" class="form-control" name="estado_civil2" placeholder="Solteiro, Casado, etc.">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label">Data de Nascimento</label>
+                      <input type="date" class="form-control" name="data_nasc" required>
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label">Naturalidade</label>
+                      <input type="text" class="form-control" name="naturalidade" placeholder="Cidade - UF">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label">Número da Carteira</label>
+                      <input type="text" class="form-control" name="numero" placeholder="Ex: 688" required>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label">Nome da Mãe</label>
+                  <input type="text" class="form-control" name="mae" placeholder="Digite o nome da mãe">
+               </div>
+
+               <div class="mb-3">
+                  <label class="form-label">Nome do Pai</label>
+                  <input type="text" class="form-control" name="pai" placeholder="Digite o nome do pai">
+               </div>
+
+
+
+               <div class="d-flex justify-content-between align-items-center mt-4">
+                  <small class="text-muted">* Campos obrigatórios</small>
+                  <button type="submit" class="btn btn-primary px-4" id="generateButton">Gerar Documento</button>
+               </div>
+            </form>
+         </div>
+      </div>
+   </div>
+
+   <footer class="py-4 mt-5">
+      <div class="container text-center">
+         <div class="row">
+            <div class="col-md-12">
+               <p class="mb-0">Desenvolvido por <a href="https://github.com/lauanderson-rael" target="_blank"
+                     class="fw-bold">Lauanderson Rael</a></p>
+               <p class="mb-0">© 2025 Todos os direitos reservados.</p>
+            </div>
+         </div>
+      </div>
+   </footer>
+
+   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+   <script>
+      // Máscara para CPF
+      document.querySelector('[name="cpf"]').addEventListener('input', function (e) {
+         let value = e.target.value.replace(/\D/g, '');
+         value = value.replace(/(\d{3})(\d)/, '$1.$2');
+         value = value.replace(/(\d{3})(\d)/, '$1.$2');
+         value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+         e.target.value = value;
+      });
+
+      // Função para atualizar campos visíveis
+      function atualizarCampos() {
+
+         const templateSelecionado = document.getElementById('selectedTemplate').value;
+
+         const camposResidencia = document.getElementById('camposResidencia');
+         const camposCarteira = document.getElementById('camposCarteira');
+
+         camposResidencia.style.display = templateSelecionado === 'residencia' ? 'block' : 'none';
+         camposCarteira.style.display = templateSelecionado === 'carteira' ? 'block' : 'none';
+      }
+
+      // Carrega os templates disponíveis
+      document.addEventListener('DOMContentLoaded', function () {
+         fetch('/templates')
+            .then(response => response.json())
+            .then(templates => {
+               const container = document.getElementById('documentOptions');
+               container.innerHTML = '';
+
+               templates.forEach(template => {
+                  const col = document.createElement('div');
+                  col.className = 'col-md-4 mb-3';
+
+                  const option = document.createElement('div');
+                  option.className = 'card document-option p-3 text-center';
+                  option.innerHTML = `
                             <h5>${template.displayName}</h5>
                             <small class="text-muted">${template.name}</small>
                         `;
 
-                        option.addEventListener('click', function () {
-                            // Remove a classe active de todas as opções
-                            document.querySelectorAll('.document-option').forEach(el => {
-                                el.classList.remove('active');
-                            });
+                  option.addEventListener('click', function () {
+                     // Remove a classe active de todas as opções
+                     document.querySelectorAll('.document-option').forEach(el => {
+                        el.classList.remove('active');
+                     });
 
-                            // Adiciona a classe active na opção selecionada
-                            this.classList.add('active');
+                     // Adiciona a classe active na opção selecionada
+                     this.classList.add('active');
 
-                            // Atualiza o template selecionado (em minúsculas)
-                            document.getElementById('selectedTemplate').value = template.name;
+                     // Atualiza o template selecionado (em minúsculas)
+                     document.getElementById('selectedTemplate').value = template.name;
 
-                            // Atualiza o texto do botão
-                            document.getElementById('generateButton').textContent = `Gerar ${template.displayName}`;
+                     // Atualiza o texto do botão
+                     document.getElementById('generateButton').textContent = `Gerar ${template.displayName}`;
 
-                            // Atualiza a visibilidade dos campos
-                            atualizarCampos();
-                        });
+                     // Atualiza a visibilidade dos campos
+                     atualizarCampos();
+                  });
 
-                        // Seleciona o primeiro template por padrão
-                        if (template.name === 'filiacao') {
-                            option.classList.add('active');
-                            document.getElementById('generateButton').textContent = `Gerar ${template.displayName}`;
-                        }
+                  // Seleciona o primeiro template por padrão
+                  if (template.name === 'filiacao') {
+                     option.classList.add('active');
+                     document.getElementById('generateButton').textContent = `Gerar ${template.displayName}`;
+                  }
 
-                        col.appendChild(option);
-                        container.appendChild(col);
-                    });
+                  col.appendChild(option);
+                  container.appendChild(col);
+               });
 
-                    // Configura campos inicialmente
-                    atualizarCampos();
-                })
-                .catch(error => {
-                    console.error('Erro ao carregar templates:', error);
-                    document.getElementById('documentOptions').innerHTML = `
+               // Configura campos inicialmente
+               atualizarCampos();
+            })
+            .catch(error => {
+               console.error('Erro ao carregar templates:', error);
+               document.getElementById('documentOptions').innerHTML = `
                         <div class="col-12">
                             <div class="alert alert-danger">Erro ao carregar os templates disponíveis</div>
                         </div>
                     `;
-                });
-        });
+            });
+      });
 
 
-    </script>
+   </script>
 </body>
 
 </html>

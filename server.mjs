@@ -28,9 +28,9 @@ const TEMPLATES = {
     },
     carteira: {
         name: 'carteira',
-        displayName: 'Carteira de Sócio',
+        displayName: 'Carteira de Sócio (Pescador)',
         outputFilename: 'carteira_socio.pdf',
-        templatePath: './templates/carteira5.pdf',
+        templatePath: './templates/carteira6.pdf',
         isPdf: true
     }
 };
@@ -108,8 +108,8 @@ async function generateDocument(templateConfig, formData) {
         templateData.bairro = formData.bairro || 'Não informado';
         //templateData.nasc = formData.nasc || 'Não informado';
        // templateConfig.estado_civil = formData.estadocivil || 'Não informado';
-       templateData.estadocivil2 = formData.estado_civil2 || 'Não informado'; 
-       templateData.nasc = formatarDataFiliacao(formData.data_nasc) || 'Não informada'; 
+       templateData.estadocivil2 = formData.estado_civil2 || 'Não informado';
+       templateData.nasc = formatarDataFiliacao(formData.data_nasc) || 'Não informada';
     }
 
     if (templateConfig.isPdf) {

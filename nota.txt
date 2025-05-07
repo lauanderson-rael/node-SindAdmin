@@ -1,7 +1,7 @@
 estadocv
 nasc
 bairro
-mae 
+mae
 pai
 natu
 rua
@@ -10,7 +10,7 @@ rg
 cpf
 n
 n2
-data 
+data
 .
 
 
@@ -31,3 +31,17 @@ const fields = {
       'text_19xymn': formData.nome_completo,
       'text_7vupy': 'COELH0 NETO-MA'
    };
+
+
+
+estrutura 2 campos numa linha:
+
+     <div class="row">
+         <div class="col-md-6 mb-3">
+
+         </div>
+         <div class="col-md-6 mb-3">
+
+         </div>
+
+    </div>
