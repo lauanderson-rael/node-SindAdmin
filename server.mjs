@@ -22,7 +22,7 @@ const __dirname = path.dirname(__filename);
 // Configurações
 const app = express();
 app.use(express.json()); //new
-const USERS = [{ id: 1, username: 'admin', password: 'admin' }]; //new
+const USERS = [{ id: 1, username: 'admin', password: 'admin000' }]; //new
 const port = 3000;
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
