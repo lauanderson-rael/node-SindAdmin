@@ -69,31 +69,31 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">RG</label>
-                                <input type="text" class="form-control" name="rg" placeholder="00.000.000-0">
+                                <input required type="text" class="form-control" name="rg" placeholder="0000000000">
                             </div>
                         </div>
 
                         <div class="row">
                             <div class="col-md-8 mb-3">
                                 <label class="form-label">Endereço</label>
-                                <input type="text" class="form-control" name="endereco" placeholder="RUA X, 123">
+                                <input required type="text" class="form-control" name="endereco" placeholder="RUA X, 123">
                             </div>
                             <div class="col-md-4 mb-3">
                                 <label class="form-label">Bairro</label>
-                                <input type="text" class="form-control" name="bairro" placeholder="CENTRO">
+                                <input required type="text" class="form-control" name="bairro" placeholder="CENTRO">
                             </div>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Data de Filiação</label>
-                            <input type="date" class="form-control" name="data_filiacao">
+                            <input required type="date" class="form-control" name="data_filiacao">
                         </div>
 
                         <!-- Campos específicos para residência -->
                         <div id="camposResidencia" style="display: none;">
                             <div class="mb-3">
                                 <label class="form-label">Sexo</label>
-                                <select class="form-select" name="sexo">
+                                <select class="form-select" name="sexo" required>
                                     <option value="M">Masculino</option>
                                     <option value="F">Feminino</option>
                                 </select>
@@ -101,7 +101,7 @@
 
                             <div class="mb-3">
                                 <label class="form-label">Estado Civil</label>
-                                <input type="text" class="form-control" name="estado_civil" placeholder="Solteiro, Casado, etc.">
+                                <input required type="text" class="form-control" name="estado_civil" placeholder="Solteiro, Casado, etc.">
                             </div>
                         </div>
                         <!-- novo -->
@@ -111,32 +111,32 @@
 
                                 <div class="mb-3">
                                     <label class="form-label">Estado Civil</label>
-                                    <input type="text" class="form-control" name="estado_civil2" placeholder="Solteiro, Casado, etc.">
+                                    <input required type="text" class="form-control" name="estado_civil2" placeholder="Solteiro, Casado, etc.">
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label">Data de Nascimento</label>
-                                    <input type="date" class="form-control" name="data_nasc">
+                                    <input required type="date" class="form-control" name="data_nasc">
                                 </div>
 
                             <div class="mb-3">
                                 <label class="form-label">Nome da Mãe</label>
-                                <input type="text" class="form-control" name="mae" placeholder="Digite o nome da mãe">
+                                <input required type="text" class="form-control" name="mae" placeholder="Digite o nome da mãe">
                             </div>
 
                             <div class="mb-3">
                                 <label class="form-label">Nome do Pai</label>
-                                <input type="text" class="form-control" name="pai" placeholder="Digite o nome do pai">
+                                <input required type="text" class="form-control" name="pai" placeholder="Digite o nome do pai">
                             </div>
 
                             <div class="mb-3">
                                 <label class="form-label">Naturalidade</label>
-                                <input type="text" class="form-control" name="naturalidade" placeholder="Cidade - UF">
+                                <input required type="text" class="form-control" name="naturalidade" placeholder="Cidade - UF">
                             </div>
 
                             <div class="mb-3">
                                 <label class="form-label">Número da Carteira</label>
-                                <input type="text" class="form-control" name="numero" placeholder="Ex: 688">
+                                <input required type="text" class="form-control" name="numero" placeholder="Ex: 688">
                             </div>
                         </div>
 
