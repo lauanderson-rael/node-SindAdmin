@@ -21,6 +21,6 @@ Sistema Node.js que automatiza a geração de documentos sindicais em formato `.
 ## 🛠️ Instalação
 
 ```bash
-git clone https://github.com/seu-usuario/sindadmin.git
-cd sindadmin
+git clone https://github.com/lauanderson-rael/node-SindAdmin.git)
+cd node-SindAdmin
 npm install
