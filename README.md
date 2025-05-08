@@ -1,6 +1,9 @@
 # 🧾 SindAdmin - Gerador de Documentos Sindicais
 
 Sistema Node.js que automatiza a geração de documentos sindicais em formato `.docx` e `.pdf`, como declarações e carteiras de sócio, a partir de templates personalizados.
+Disponivel em: https://node-autowrite.onrender.com/
+user: admin
+pass: admin
 
 ## 📌 Funcionalidades
 
