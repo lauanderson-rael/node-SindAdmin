@@ -1,12 +1,9 @@
 
 import express from 'express';
-import bodyParser from 'body-parser';
 import fs from 'fs';
 import Docxtemplater from 'docxtemplater';
 import PizZip from 'pizzip';
 import { PDFDocument } from 'pdf-lib';
-
-//new
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import path from 'path';
@@ -17,12 +14,11 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-//new
+const USERS = [{ id: 1, username: 'admin', password: 'admin000' }];
 
 // Configurações
 const app = express();
 app.use(express.json()); //new
-const USERS = [{ id: 1, username: 'admin', password: 'admin000' }]; //new
 const port = 3000;
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
@@ -122,8 +118,6 @@ async function generateDocument(templateConfig, formData) {
         templateData.naturalidade = formData.naturalidade || 'Não informada';
         templateData.numero = formData.numero || 'Não informado';
         templateData.bairro = formData.bairro || 'Não informado';
-        //templateData.nasc = formData.nasc || 'Não informado';
-       // templateConfig.estado_civil = formData.estadocivil || 'Não informado';
        templateData.estadocivil2 = formData.estado_civil2 || 'Não informado';
        templateData.nasc = formatarDataFiliacao(formData.data_nasc) || 'Não informada';
     }
@@ -137,16 +131,11 @@ async function generateDocument(templateConfig, formData) {
             paragraphLoop: true,
             linebreaks: true,
         });
-
+        //console.log('Dados enviados ao template:', templateData);
         doc.render(templateData);
         return await doc.getZip().generate({ type: 'nodebuffer' });
     }
 }
-
-// Rotas
-// app.get('/', (req, res) => {
-//     res.sendFile(process.cwd() + '/public/index.html');
-// });
 
 app.get('/templates', (req, res) => {
     res.json(Object.values(TEMPLATES).map(t => ({
@@ -192,13 +181,13 @@ app.post('/login', (req, res) => {
     const token = jwt.sign({ username: user.username }, process.env.JWT_SECRET, { expiresIn: '3h' });
     res.json({ token });
   });
-  
+
   // rota protegida
   app.get('/protected', authToken, (req, res) => {
     console.log(req.user);
     res.json({ message: `Olá, ${req.user.username}. Você está autenticado!` });
   });
-  
+
   // rota da página de login
   app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'login.html'));

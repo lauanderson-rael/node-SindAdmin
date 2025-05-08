@@ -1,1 +1,1 @@
-aplicativo para automatizar tarefas
+Aplicativo para automatizar tarefas
