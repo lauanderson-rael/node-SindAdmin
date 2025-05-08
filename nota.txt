@@ -1,0 +1,475 @@
+server.mjs
+import express from 'express';
+import fs from 'fs';
+import Docxtemplater from 'docxtemplater';
+import PizZip from 'pizzip';
+import { PDFDocument } from 'pdf-lib';
+import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { authToken } from './middleware/auth.js';
+
+dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const USERS = [{ id: 1, username: 'admin', password: 'admin' }];
+
+// Configurações
+const app = express();
+app.use(express.json()); //new
+const port = process.env.PORT || 3000;
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static('public'));
+app.use('/templates', express.static('templates'));
+
+// Definição dos templates disponíveis
+const TEMPLATES = {
+    filiacao: {
+        name: 'filiacao',
+        displayName: 'Declaração de Filiação',
+        outputFilename: 'declaracao_filiacao.docx',
+        templatePath: './templates/filiacao.docx'
+    },
+    residencia: {
+        name: 'residencia',
+        displayName: 'Declaração de Residencia',
+        outputFilename: 'declaracao_residencia.docx',
+        templatePath: './templates/residencia.docx'
+    },
+    carteira: {
+        name: 'carteira',
+        displayName: 'Carteira de Sócio (Pescador)',
+        outputFilename: 'carteira_socio.pdf',
+        templatePath: './templates/carteira6.pdf',
+        isPdf: true
+    }
+};
+
+function formatarDataFiliacao(dataISO) {
+    if (!dataISO) return 'Não informada';
+    const [ano, mes, dia] = dataISO.split('-');
+    return `${dia}/${mes}/${ano}`;
+}
+
+// Função para gerar PDF
+async function generatePdf(templatePath, formData) {
+    const pdfBytes = fs.readFileSync(templatePath);
+    const pdfDoc = await PDFDocument.load(pdfBytes);
+    const form = pdfDoc.getForm();
+    const fields = {
+        'mae': formData.mae,
+        'rg': formData.rg,
+        'cpf': formData.cpf,
+        'n': formData.numero || 'Não informado',
+        'emissao': formData.data_filiacao || 'Não informada',
+        'rua': formData.endereco || 'Não informado',
+        'data': formData.data_filiacao || 'Não informada',
+        'bairro': formData.bairro || 'Não informado',
+        'n2': formData.numero || 'Não informado',
+        'pai': formData.pai,
+        'nome': formData.nome_completo,
+        'natu': formData.naturalidade || 'Não informado',
+
+        'nasc': formData.nasc,
+        'estadocv': formData.estadocivil2 || 'Não informado',
+    };
+
+    Object.entries(fields).forEach(([fieldName, value]) => {
+        try {
+            const field = form.getTextField(fieldName);
+            field.setText(value);
+
+        } catch (e) {
+            console.warn(`Campo ${fieldName} não encontrado no PDF`);
+        }
+    });
+    return await pdfDoc.save();
+}
+
+async function generateDocument(templateConfig, formData) {
+    // Dados comuns a todos templates
+    const templateData = {
+        nome_completo: formData.nome_completo,
+        cpf: formData.cpf,
+        rg: formData.rg || 'Não informado',
+        endereco: formData.endereco || 'Não informado',
+        bairro: formData.bairro || 'Não informado',
+        data_filiacao: formatarDataFiliacao(formData.data_filiacao),
+        data_emissao: new Date().toLocaleDateString('pt-BR', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        })
+    };
+
+    // Campos específicos para residência
+    if (templateConfig.name === 'residencia') {
+        templateData.sexo = formData.sexo || 'Não informado';
+        templateData.estado_civil = formData.estado_civil || 'Não informado';
+        templateData.nacionalidade = formData.sexo === 'F' ? 'BRASILEIRA' : 'BRASILEIRO';
+    }
+
+    // Campos específicos para Carteira de Sócio
+    if (templateConfig.name === 'carteira') {
+        templateData.mae = formData.mae || 'Não informada';
+        templateData.pai = formData.pai || 'Não informado';
+        templateData.naturalidade = formData.naturalidade || 'Não informada';
+        templateData.numero = formData.numero || 'Não informado';
+        templateData.bairro = formData.bairro || 'Não informado';
+       templateData.estadocivil2 = formData.estado_civil2 || 'Não informado';
+       templateData.nasc = formatarDataFiliacao(formData.data_nasc) || 'Não informada';
+    }
+
+    if (templateConfig.isPdf) {
+        return await generatePdf(templateConfig.templatePath, templateData);
+    } else {
+        const content = fs.readFileSync(templateConfig.templatePath, 'binary');
+        const zip = new PizZip(content);
+        const doc = new Docxtemplater(zip, {
+            paragraphLoop: true,
+            linebreaks: true,
+        });
+        //console.log('Dados enviados ao template:', templateData);
+        doc.render(templateData);
+        return await doc.getZip().generate({ type: 'nodebuffer' });
+    }
+}
+
+app.get('/templates', (req, res) => {
+    res.json(Object.values(TEMPLATES).map(t => ({
+        name: t.name,
+        displayName: t.displayName
+    })));
+});
+
+app.post('/generate-docs', async (req, res) => {
+    try {
+        const { nome_completo, cpf, template } = req.body;
+        if (!nome_completo || !cpf) {
+            return res.status(400).send('Nome completo e CPF são obrigatórios');
+        }
+
+        const templateConfig = TEMPLATES[template.toLowerCase()] || TEMPLATES.filiacao;
+        const buffer = await generateDocument(templateConfig, req.body);
+
+        const contentType = templateConfig.isPdf
+            ? 'application/pdf'
+            : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+
+        res.setHeader('Content-Type', contentType);
+        res.setHeader('Content-Disposition', `attachment; filename=${templateConfig.outputFilename}`);
+        res.end(buffer);
+    } catch (error) {
+        console.error('Erro ao gerar documento:', error);
+        res.status(500).send(`Erro ao gerar documento: ${error.message}`);
+    }
+});
+
+
+// -----------------------------
+
+
+// rota de login
+app.post('/login', (req, res) => {
+    const { username, password } = req.body;
+    const user = USERS.find(u => u.username === username && u.password === password);
+
+    const JWT_SECRET = 'your_jwt_secret'
+    if (!user) return res.status(401).json({ message: 'Credenciais inválidas!' });
+    const token = jwt.sign({ username: user.username }, process.env.JWT_SECRET, { expiresIn: '3h' });
+    res.json({ token });
+  });
+
+  // rota protegida
+  app.get('/protected', authToken, (req, res) => {
+    console.log(req.user);
+    res.json({ message: `Olá, ${req.user.username}. Você está autenticado!` });
+  });
+
+  // rota da página de login
+  app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'login.html'));
+  });
+
+
+
+app.listen(port, () => {
+    console.log(`Servidor rodando em http://localhost:${port}`);
+});
+
+
+
+
+
+
+protected.html
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SindAdmin - Home</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .document-option {
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .document-option:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .document-option.active {
+            border: 2px solid #0d6efd;
+            background-color: #f8f9fa;
+        }
+
+        #camposResidencia {
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body class="bg-light pt-4">
+    <div class="container">
+        <div class="card mx-auto shadow" style="max-width: 800px">
+            <div class="card-body p-4">
+                <h2 class="text-primary text-center mb-4">SindAdmin - Gerador de Documentos Sindicais </h1>
+
+                    <!-- Seção de seleção de documento -->
+                    <div class="mb-4">
+                        <h5 class="mb-3">Selecione o documento a ser gerado:</h5>
+                        <div class="row" id="documentOptions">
+                            <!-- Opções serão preenchidas via JavaScript -->
+                            <div class="col-12 text-center">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Carregando...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Formulário -->
+                    <form id="documentForm" action="/generate-docs" method="POST">
+                        <input type="hidden" name="template" id="selectedTemplate" value="filiacao">
+
+                        <div class="mb-3">
+                            <label class="form-label">Nome Completo
+                                <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control" name="nome_completo" placeholder="DIGITE O NOME COMPLETO" required>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">CPF
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" name="cpf" required placeholder="000.000.000-00">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">RG</label>
+                                <input type="text" class="form-control" name="rg" placeholder="00.000.000-0">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                <label class="form-label">Endereço</label>
+                                <input type="text" class="form-control" name="endereco" placeholder="RUA X, 123">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Bairro</label>
+                                <input type="text" class="form-control" name="bairro" placeholder="CENTRO">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Data de Filiação</label>
+                            <input type="date" class="form-control" name="data_filiacao">
+                        </div>
+
+                        <!-- Campos específicos para residência -->
+                        <div id="camposResidencia" style="display: none;">
+                            <div class="mb-3">
+                                <label class="form-label">Sexo</label>
+                                <select class="form-select" name="sexo">
+                                    <option value="M">Masculino</option>
+                                    <option value="F">Feminino</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Estado Civil</label>
+                                <input type="text" class="form-control" name="estado_civil" placeholder="Solteiro, Casado, etc.">
+                            </div>
+                        </div>
+                        <!-- novo -->
+
+                        <!-- Campos específicos para Carteira de Sócio -->
+                        <div id="camposCarteira" style="display: none;">
+                            
+                                <div class="mb-3">
+                                    <label class="form-label">Estado Civil</label>
+                                    <input type="text" class="form-control" name="estado_civil2" placeholder="Solteiro, Casado, etc.">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Data de Nascimento</label>
+                                    <input type="date" class="form-control" name="data_nasc">
+                                </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Nome da Mãe</label>
+                                <input type="text" class="form-control" name="mae" placeholder="Digite o nome da mãe">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Nome do Pai</label>
+                                <input type="text" class="form-control" name="pai" placeholder="Digite o nome do pai">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Naturalidade</label>
+                                <input type="text" class="form-control" name="naturalidade" placeholder="Cidade - UF">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Número da Carteira</label>
+                                <input type="text" class="form-control" name="numero" placeholder="Ex: 688">
+                            </div>
+                        </div>
+
+                        <!-- novo -->
+
+                        <div class="d-flex justify-content-between align-items-center mt-4">
+                            <small class="text-muted">* Campos obrigatórios</small>
+                            <button type="submit" class="btn btn-primary px-4" id="generateButton">Gerar Documento</button>
+                        </div>
+                    </form>
+            </div>
+        </div>
+    </div>
+
+    <footer class="py-4 mt-5 bg-body-secondary text-center">
+      <p class="mb-0">Desenvolvido por <a href="https://github.com/lauanderson-rael" target="_blank"
+            class="fw-bold">Lauanderson Rael</a></p>
+      <p class="mb-0">© 2025 Todos os direitos reservados.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Máscara para CPF
+        document.querySelector('[name="cpf"]').addEventListener('input', function (e) {
+            let value = e.target.value.replace(/\D/g, '');
+            value = value.replace(/(\d{3})(\d)/, '$1.$2');
+            value = value.replace(/(\d{3})(\d)/, '$1.$2');
+            value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+            e.target.value = value;
+        });
+
+        // Função para atualizar campos visíveis
+        function atualizarCampos() {
+            // const templateSelecionado = document.getElementById('selectedTemplate').value;
+            // const camposResidencia = document.getElementById('camposResidencia');
+            // camposResidencia.style.display = templateSelecionado === 'residencia' ? 'block' : 'none';
+
+            const templateSelecionado = document.getElementById('selectedTemplate').value;
+
+            const camposResidencia = document.getElementById('camposResidencia');
+            const camposCarteira = document.getElementById('camposCarteira');
+
+            camposResidencia.style.display = templateSelecionado === 'residencia' ? 'block' : 'none';
+            camposCarteira.style.display = templateSelecionado === 'carteira' ? 'block' : 'none';
+        }
+
+        // Carrega os templates disponíveis
+        document.addEventListener('DOMContentLoaded', function () {
+            fetch('/templates')
+                .then(response => response.json())
+                .then(templates => {
+                    const container = document.getElementById('documentOptions');
+                    container.innerHTML = '';
+
+                    templates.forEach(template => {
+                        const col = document.createElement('div');
+                        col.className = 'col-md-4 mb-3';
+
+                        const option = document.createElement('div');
+                        option.className = 'card document-option p-3 text-center';
+                        option.innerHTML = `
+                            <h5>${template.displayName}</h5>
+                            <small class="text-muted">${template.name}</small>
+                        `;
+
+                        option.addEventListener('click', function () {
+                            // Remove a classe active de todas as opções
+                            document.querySelectorAll('.document-option').forEach(el => {
+                                el.classList.remove('active');
+                            });
+
+                            // Adiciona a classe active na opção selecionada
+                            this.classList.add('active');
+
+                            // Atualiza o template selecionado (em minúsculas)
+                            document.getElementById('selectedTemplate').value = template.name;
+
+                            // Atualiza o texto do botão
+                            document.getElementById('generateButton').textContent = `Gerar ${template.displayName}`;
+
+                            // Atualiza a visibilidade dos campos
+                            atualizarCampos();
+                        });
+
+                        // Seleciona o primeiro template por padrão
+                        if (template.name === 'filiacao') {
+                            option.classList.add('active');
+                            document.getElementById('generateButton').textContent = `Gerar ${template.displayName}`;
+                        }
+
+                        col.appendChild(option);
+                        container.appendChild(col);
+                    });
+
+                    // Configura campos inicialmente
+                    atualizarCampos();
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar templates:', error);
+                    document.getElementById('documentOptions').innerHTML = `
+                        <div class="col-12">
+                            <div class="alert alert-danger">Erro ao carregar os templates disponíveis</div>
+                        </div>
+                    `;
+                });
+        });
+
+        async function verificarAcesso() {
+         const token = localStorage.getItem('token');
+         const res = await fetch('/protected', {
+           headers: { 'Authorization': 'Bearer ' + token }
+         });
+
+         if (res.ok) {
+           const data = await res.json();
+           document.getElementById('conteudo').innerText = data.message;
+         } else {
+           alert('Acesso negado');
+           window.location.href = '/';
+         }
+       }
+
+       verificarAcesso();
+
+
+    </script>
+</body>
+
+</html>
