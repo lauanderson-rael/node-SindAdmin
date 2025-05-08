@@ -189,7 +189,7 @@ app.post('/login', (req, res) => {
 
     const JWT_SECRET = 'your_jwt_secret'
     if (!user) return res.status(401).json({ message: 'Credenciais inválidas!' });
-    const token = jwt.sign({ username: user.username }, JWT_SECRET, { expiresIn: '3h' });
+    const token = jwt.sign({ username: user.username }, process.env.JWT_SECRET, { expiresIn: '3h' });
     res.json({ token });
   });
   
