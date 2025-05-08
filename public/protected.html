@@ -154,11 +154,22 @@
          });
 
       // Verificação de acesso (pode ser removido se não for necessário)
-      (async () => {
+      async function verificarAcesso() {
          const token = localStorage.getItem('token');
-         const res = await fetch('/protected', { headers: { Authorization: 'Bearer ' + token } });
-         if (!res.ok) return location.href = '/';
-      })();
+         const res = await fetch('/protected', {
+           headers: { 'Authorization': 'Bearer ' + token }
+         });
+
+         if (res.ok) {
+           const data = await res.json();
+           document.getElementById('conteudo').innerText = data.message;
+         } else {
+           alert('Acesso negado');
+           window.location.href = '/';
+         }
+       }
+
+       verificarAcesso();
    </script>
 </body>
 
