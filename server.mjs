@@ -14,7 +14,7 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const USERS = [{ id: 1, username: 'admin', password: 'admin000' }];
+const USERS = [{ id: 1, username: 'admin', password: 'admin' }];
 
 // Configurações
 const app = express();
