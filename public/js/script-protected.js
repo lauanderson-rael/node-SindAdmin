@@ -102,9 +102,22 @@ verificarAcesso();
 
 
 
+ //<button onclick="logout()" class="btn btn-danger px-4">Sair</button>
  function logout() {
-    // Remove o token JWT do localStorage
     localStorage.removeItem('token');
-    // Redireciona para a página de login
     window.location.href = '/';
 }
+
+
+// Mostra o modal
+function showLogoutModal() {
+    const modal = new bootstrap.Modal(document.getElementById('logoutModal'));
+    modal.show();
+  }
+  
+  // Configura o botão de confirmação
+  document.getElementById('confirmLogout').addEventListener('click', function() {
+    localStorage.removeItem('token');
+    window.location.href = '/';
+  });
+  
