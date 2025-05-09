@@ -89,13 +89,22 @@ async function verificarAcesso() {
         const data = await res.json();
         document.getElementById('conteudo').innerText = data.message;
     } else {
-        alert('Acesso negado');
-        window.location.href = '/';
+        //alert('Acesso negado');
+        window.location.href = '/unauthorized.html';
     }
 }
 
 verificarAcesso();
 
- // Pega a data de hoje no formato YYYY-MM-DD
+ // Data de hoje no formato YYYY-MM-DD
  const hoje = new Date().toISOString().split('T')[0];
  document.getElementById('data_filiacao').value = hoje;
+
+
+
+ function logout() {
+    // Remove o token JWT do localStorage
+    localStorage.removeItem('token');
+    // Redireciona para a página de login
+    window.location.href = '/';
+}

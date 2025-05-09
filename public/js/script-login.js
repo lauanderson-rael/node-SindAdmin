@@ -1,23 +1,37 @@
-// Função de login
+
 function login() {
   const username = document.getElementById("user").value;
   const password = document.getElementById("pass").value;
 
   fetch('/login', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username, password })
   })
   .then(response => response.json())
   .then(data => {
+    const msgDiv = document.getElementById("mensagem");
+
     if (data.token) {
-      localStorage.setItem("token", data.token);  // Armazena o token no localStorage
-      alert("Login realizado com sucesso!");
-      window.location.href = "protected.html";  // Redireciona para a página protegida
+      localStorage.setItem("token", data.token);
+
+      msgDiv.innerHTML = `
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+          <strong>Sucesso!</strong> Login realizado com sucesso.
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+        </div>
+      `;
+
+      setTimeout(() => {
+        window.location.href = "protected.html";
+      }, 1500);
     } else {
-      alert("Credenciais inválidas!");
+      msgDiv.innerHTML = `
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+          <strong>Erro!</strong> Credenciais inválidas.
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+        </div>
+      `;
     }
   })
   .catch(error => {
@@ -25,26 +39,3 @@ function login() {
   });
 }
 
-// Função para acessar a rota protegida
-function rotaProtegida() {
-  const token = localStorage.getItem("token");  // Recupera o token do localStorage
-
-  if (!token) {
-    alert("Você precisa estar logado!");
-    return;
-  }
-
-  fetch('/protected', {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${token}`  // Envia o token no cabeçalho
-    }
-  })
-  .then(response => response.json())
-  .then(data => {
-    document.getElementById("saida").textContent = JSON.stringify(data, null, 2);  // Exibe a resposta
-  })
-  .catch(error => {
-    console.error('Erro:', error);
-  });
-}
